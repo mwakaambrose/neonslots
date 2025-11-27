@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Transaction;
 use App\Models\Wallet;
+use App\Jobs\ProcessDepositJob;
+use App\Jobs\ProcessWithdrawJob;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -34,24 +36,18 @@ class WalletController extends Controller
             'type' => 'deposit',
             'amount_credits' => $amount,
             'status' => 'pending',
-            'external_ref' => 'mpesa_' . uniqid(),
+            'external_ref' => 'deposit_' . uniqid(),
         ]);
 
-        $wallet->balance_credits += $amount;
-        $wallet->save();
+        // Dispatch a job to invoke the Relwox collection (requestPayment)
+        ProcessDepositJob::dispatch($tx->id);
 
-        // Return wallet and transaction info
+        // Return initial pending response — job will update tx status/meta and webhook will top up on final success
         return response()->json([
             'transactionId' => $tx->id,
-            'status' => "completed",
-            // 'status' => $tx->status,
-            'message' => 'Please enter your mobile money PIN on the prompt sent to your phone.',
+            'status' => $tx->status,
+            'message' => 'Request sent. Follow the mobile prompt to complete payment.',
             'external_ref' => $tx->external_ref,
-            'wallet' => [
-                'id' => $wallet->id,
-                'balance' => $wallet->balance_credits,
-                'currency' => 'CREDITS',
-            ],
         ]);
     }
 
@@ -76,6 +72,8 @@ class WalletController extends Controller
                 'amount_credits' => -1 * $amount,
                 'status' => 'processing',
             ]);
+            // dispatch withdraw job to call Relwox sendPayment
+            ProcessWithdrawJob::dispatch($tx->id);
             DB::commit();
             return response()->json(['transactionId' => $tx->id, 'newBalance' => $wallet->balance_credits, 'status' => $tx->status]);
         } catch (\Exception $e) {

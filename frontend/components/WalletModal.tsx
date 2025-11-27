@@ -85,20 +85,24 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, onDep
           }
       } else {
           result = await walletService.withdraw(finalAmount);
+          // If server responded that processing/pending, show instructions
           if (result.status === 'pending' || result.status === 'processing') {
             setLoading(false);
             setStep('PENDING');
             setPendingDeposit({
               message: `UGX ${(finalAmount * EXCHANGE_RATE).toLocaleString()} will be sent to your phone (${phone}). Please wait for a confirmation SMS.`,
-              external_ref: result.transactionId || ''
+              external_ref: result.transactionId || result.external_ref || ''
             });
             return;
           }
+
           setLoading(false);
           setStep('SUCCESS');
           setPendingDeposit(null);
-          if (result && typeof result.balance === 'number') {
-            onDepositSuccess(result.balance);
+          // backend may return newBalance or balance
+          const newBal = (result && typeof result.balance === 'number') ? result.balance : result?.newBalance;
+          if (typeof newBal === 'number') {
+            onDepositSuccess(newBal);
           }
       }
     } catch (e: any) {
