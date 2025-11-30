@@ -70,6 +70,7 @@ export default function AdminDashboard() {
         nearMissRecent,
         timeseries,
         config,
+        providerBalances,
     } = props as any;
 
     const rtpRef = useRef<HTMLCanvasElement | null>(null);
@@ -529,12 +530,45 @@ export default function AdminDashboard() {
                     <Card>
                         <CardHeader>
                             <CardTitle className="text-sm">
-                                Placeholder
+                                Provider Balances
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <div className="text-sm text-muted">
-                                Add another metric here
+                            <div className="space-y-3">
+                                <div className="flex items-center justify-between p-2 bg-slate-50 dark:bg-slate-900 rounded">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-sm font-medium">Relwox</span>
+                                        {providerBalances?.relwox?.error && (
+                                            <span className="text-xs text-red-500">Error</span>
+                                        )}
+                                    </div>
+                                    <div className="text-sm font-semibold">
+                                        {providerBalances?.relwox?.error ? (
+                                            <span className="text-red-500">Failed</span>
+                                        ) : providerBalances?.relwox?.balance !== null && providerBalances?.relwox?.balance !== undefined ? (
+                                            fmtUGX(providerBalances.relwox.balance)
+                                        ) : (
+                                            <span className="text-muted">-</span>
+                                        )}
+                                    </div>
+                                </div>
+                                <div className="flex items-center justify-between p-2 bg-slate-50 dark:bg-slate-900 rounded">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-sm font-medium">EazzyConnect</span>
+                                        {providerBalances?.eazzyconnect?.error && (
+                                            <span className="text-xs text-red-500">Error</span>
+                                        )}
+                                    </div>
+                                    <div className="text-sm font-semibold">
+                                        {providerBalances?.eazzyconnect?.error ? (
+                                            <span className="text-red-500">Failed</span>
+                                        ) : providerBalances?.eazzyconnect?.balance !== null && providerBalances?.eazzyconnect?.balance !== undefined ? (
+                                            fmtUGX(providerBalances.eazzyconnect.balance)
+                                        ) : (
+                                            <span className="text-muted">-</span>
+                                        )}
+                                    </div>
+                                </div>
                             </div>
                         </CardContent>
                     </Card>
@@ -579,6 +613,97 @@ export default function AdminDashboard() {
                                 </div>
                             </div>
                             <div className="mt-2"><canvas ref={revenueRef} style={{ height: 220 }} /></div>
+                        </CardContent>
+                    </Card>
+                </div>
+
+                {/* Provider Wallet Balances */}
+                <div className="mt-6">
+                    <Card>
+                        <CardHeader className="flex items-center justify-between">
+                            <div>
+                                <CardTitle>Payment Provider Wallet Balances</CardTitle>
+                                <p className="text-xs text-muted mt-1">
+                                    Balances are cached for 5 minutes. Click refresh to update.
+                                </p>
+                            </div>
+                            <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                    // Clear cache and reload
+                                    fetch('/api/admin/clear-balance-cache', { method: 'POST', credentials: 'same-origin' })
+                                        .then(() => window.location.reload())
+                                        .catch(() => window.location.reload());
+                                }}
+                            >
+                                🔄 Refresh
+                            </Button>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                                <div className="p-4 border-2 border-blue-500/30 rounded-lg bg-blue-50 dark:bg-blue-950/20">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-lg font-bold text-blue-600 dark:text-blue-400">Relwox</span>
+                                            {providerBalances?.relwox?.error && (
+                                                <Badge variant="secondary" className="text-xs bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300">Error</Badge>
+                                            )}
+                                        </div>
+                                        <span className="text-xs text-muted">Mobile Money</span>
+                                    </div>
+                                    <div className="text-2xl font-bold text-blue-700 dark:text-blue-300">
+                                        {providerBalances?.relwox?.error ? (
+                                            <span className="text-red-500 text-base">Failed to fetch</span>
+                                        ) : providerBalances?.relwox?.balance !== null && providerBalances?.relwox?.balance !== undefined ? (
+                                            fmtUGX(providerBalances.relwox.balance)
+                                        ) : (
+                                            <span className="text-muted">Loading...</span>
+                                        )}
+                                    </div>
+                                    {providerBalances?.relwox?.error && (
+                                        <div className="mt-2 text-xs text-red-500">
+                                            {providerBalances.relwox.error}
+                                        </div>
+                                    )}
+                                    {providerBalances?.relwox?.currency && (
+                                        <div className="mt-1 text-xs text-muted">
+                                            Currency: {providerBalances.relwox.currency}
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="p-4 border-2 border-green-500/30 rounded-lg bg-green-50 dark:bg-green-950/20">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-lg font-bold text-green-600 dark:text-green-400">EazzyConnect</span>
+                                            {providerBalances?.eazzyconnect?.error && (
+                                                <Badge variant="secondary" className="text-xs bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300">Error</Badge>
+                                            )}
+                                        </div>
+                                        <span className="text-xs text-muted">SMS Service</span>
+                                    </div>
+                                    <div className="text-2xl font-bold text-green-700 dark:text-green-300">
+                                        {providerBalances?.eazzyconnect?.error ? (
+                                            <span className="text-red-500 text-base">Failed to fetch</span>
+                                        ) : providerBalances?.eazzyconnect?.balance !== null && providerBalances?.eazzyconnect?.balance !== undefined ? (
+                                            fmtUGX(providerBalances.eazzyconnect.balance)
+                                        ) : (
+                                            <span className="text-muted">Loading...</span>
+                                        )}
+                                    </div>
+                                    {providerBalances?.eazzyconnect?.error && (
+                                        <div className="mt-2 text-xs text-red-500">
+                                            {providerBalances.eazzyconnect.error}
+                                        </div>
+                                    )}
+                                    {providerBalances?.eazzyconnect?.currency && (
+                                        <div className="mt-1 text-xs text-muted">
+                                            Currency: {providerBalances.eazzyconnect.currency}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
                         </CardContent>
                     </Card>
                 </div>

@@ -3,6 +3,7 @@
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\AddCorsHeaders;
+use App\Http\Middleware\RequestResponseLogger;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -27,6 +28,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // Enable CORS for API routes - use custom middleware for explicit control
         $middleware->api(prepend: [
+            RequestResponseLogger::class, // Log all API requests/responses
             AddCorsHeaders::class,
             \Illuminate\Http\Middleware\HandleCors::class,
         ]);

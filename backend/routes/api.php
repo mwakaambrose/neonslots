@@ -30,6 +30,9 @@ Route::middleware('auth:sanctum')->group(function () {
     // admin config - recommend further admin middleware in production
     Route::post('/admin/config', [AdminConfigController::class, 'update']);
     Route::get('/admin/config', [AdminConfigController::class, 'show']);
+    
+    // Clear balance cache for admin dashboard
+    Route::post('/admin/clear-balance-cache', [AdminController::class, 'clearBalanceCache']);
 });
 
 // Health check endpoint

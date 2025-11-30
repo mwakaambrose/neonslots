@@ -82,16 +82,68 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin, onOpenTerms }) 
   const provider = getProvider(phoneBody);
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-slate-950 to-black">
-      {/* Hero Image / Branding placeholder */}
-      <div className="mb-8 text-center">
-        <h1 className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-500 to-amber-600 tracking-tighter drop-shadow-[0_2px_10px_rgba(234,179,8,0.5)]">
-          NEON SLOTS
-        </h1>
-        <p className="text-slate-400 mt-2 tracking-widest text-xs uppercase">Uganda's #1 Mobile Casino</p>
+    <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-gradient-to-br from-slate-950 via-purple-950 to-slate-900 relative overflow-hidden">
+      {/* Animated background effects */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-amber-500/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+        
+        {/* Floating slot symbols */}
+        {['🍌', '☕', '🌯', '🥁', '🛵', '🦩', '🦍', '🛡️'].map((symbol, i) => (
+          <div
+            key={i}
+            className="absolute text-5xl opacity-20 animate-bounce"
+            style={{
+              left: `${10 + i * 12}%`,
+              top: `${15 + (i % 3) * 30}%`,
+              animationDelay: `${i * 0.3}s`,
+              animationDuration: '2s',
+            }}
+          >
+            {symbol}
+          </div>
+        ))}
       </div>
 
-      <div className="w-full max-w-md bg-slate-900/50 backdrop-blur-md border border-slate-800 p-8 rounded-3xl shadow-2xl">
+      <div className="relative z-10 w-full max-w-md">
+        {/* Hero with animated slot machine */}
+        <div className="mb-8 text-center">
+          <div className="mb-4">
+            {/* Animated slot machine display */}
+            <div className="inline-block bg-black border-4 border-amber-600 rounded-xl p-4 shadow-[0_0_30px_rgba(234,179,8,0.4)]">
+              <div className="grid grid-cols-3 gap-2">
+                {['🦍', '🦍', '🦍'].map((symbol, i) => (
+                  <div
+                    key={i}
+                    className="bg-slate-900 border-2 border-amber-500 rounded-lg p-3 text-3xl flex items-center justify-center h-16 animate-pulse"
+                    style={{ animationDelay: `${i * 0.2}s` }}
+                  >
+                    {symbol}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <h1 className="text-6xl font-black mb-2">
+            <span className="bg-gradient-to-r from-amber-300 via-yellow-400 to-amber-600 bg-clip-text text-transparent drop-shadow-[0_0_20px_rgba(245,158,11,0.5)] animate-pulse">
+              NEON
+            </span>
+            <br />
+            <span className="bg-gradient-to-r from-purple-400 via-pink-500 to-amber-500 bg-clip-text text-transparent drop-shadow-[0_0_20px_rgba(168,85,247,0.5)]">
+              SLOTS
+            </span>
+          </h1>
+          <p className="text-slate-300 mt-2 tracking-widest text-sm uppercase font-bold">🎰 Uganda's #1 Mobile Casino 🎰</p>
+          
+          {/* Win animation preview */}
+          <div className="mt-4 text-center">
+            <div className="inline-block bg-green-500/20 border border-green-500/50 rounded-lg px-4 py-2">
+              <span className="text-green-400 font-black text-lg animate-pulse">💰 BIG WIN! +10,000 Credits 💰</span>
+            </div>
+          </div>
+        </div>
+
+      <div className="w-full bg-slate-900/80 backdrop-blur-md border-4 border-amber-600 p-8 rounded-3xl shadow-[0_0_50px_rgba(234,179,8,0.3)]">
         {step === 'PHONE' ? (
           <form onSubmit={handleSendOtp} className="space-y-6">
             <div className="space-y-2">
@@ -136,10 +188,20 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin, onOpenTerms }) 
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-400 hover:to-yellow-500 text-black font-bold py-4 rounded-xl shadow-lg shadow-amber-900/20 flex items-center justify-center gap-2 transition-transform active:scale-95 disabled:opacity-50 disabled:active:scale-100"
+              className="w-full bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-400 hover:to-yellow-500 text-black font-black py-5 rounded-xl shadow-[0_0_30px_rgba(245,158,11,0.5)] hover:shadow-[0_0_40px_rgba(245,158,11,0.7)] flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-50 disabled:active:scale-100 text-lg transform hover:scale-105"
             >
-              {loading ? 'Validating...' : 'Play Now'}
-              {!loading && <ArrowRight size={20} />}
+              {loading ? (
+                <>
+                  <span className="animate-spin">🎰</span>
+                  <span>Validating...</span>
+                </>
+              ) : (
+                <>
+                  <span>🎰</span>
+                  <span>PLAY NOW</span>
+                  <ArrowRight size={20} />
+                </>
+              )}
             </button>
           </form>
         ) : (
@@ -163,9 +225,19 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin, onOpenTerms }) 
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white font-bold py-4 rounded-xl shadow-lg shadow-green-900/20 transition-transform active:scale-95"
+              className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white font-black py-5 rounded-xl shadow-[0_0_30px_rgba(34,197,94,0.5)] hover:shadow-[0_0_40px_rgba(34,197,94,0.7)] transition-all active:scale-95 text-lg transform hover:scale-105"
             >
-              {loading ? 'Verifying...' : 'Start Playing'}
+              {loading ? (
+                <>
+                  <span className="animate-spin">🎰</span>
+                  <span>Verifying...</span>
+                </>
+              ) : (
+                <>
+                  <span>🎰</span>
+                  <span>START PLAYING</span>
+                </>
+              )}
             </button>
             <button 
                 type="button" 

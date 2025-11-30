@@ -5,9 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\Spin;
 use App\Models\Transaction;
 use App\Models\Player;
+use App\Services\RelwoxService;
+use App\Services\EazzyConnectService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class AdminController extends Controller
@@ -18,6 +21,14 @@ class AdminController extends Controller
         Cache::put('admin_target_rtp', (float) $request->input('targetRtp'));
         Cache::put('admin_max_mult', (int) $request->input('maxWinMultiplier'));
         return response()->json(['success' => true, 'config' => ['targetRtp' => (float) $request->input('targetRtp'), 'maxWinMultiplier' => (int) $request->input('maxWinMultiplier')]]);
+    }
+
+    public function clearBalanceCache(Request $request)
+    {
+        Cache::forget('admin_relwox_balance');
+        Cache::forget('admin_eazzy_balance');
+        Log::info('AdminDashboard: Balance cache cleared');
+        return response()->json(['success' => true, 'message' => 'Cache cleared']);
     }
 
     public function dashboard(Request $request)
@@ -101,6 +112,95 @@ class AdminController extends Controller
             'maxWinMultiplier' => $configModel->max_win_multiplier ?? Cache::get('admin_max_mult', 50),
         ];
 
+        // Fetch wallet balances from payment providers (cached for 5 minutes)
+        $relwoxBalance = null;
+        $eazzyBalance = null;
+        $relwoxError = null;
+        $eazzyError = null;
+
+        // Check cache first
+        $relwoxCacheKey = 'admin_relwox_balance';
+        $eazzyCacheKey = 'admin_eazzy_balance';
+        
+        $cachedRelwox = Cache::get($relwoxCacheKey);
+        $cachedEazzy = Cache::get($eazzyCacheKey);
+
+        if ($cachedRelwox !== null) {
+            $relwoxBalance = $cachedRelwox['balance'] ?? null;
+            $relwoxError = $cachedRelwox['error'] ?? null;
+            Log::info('AdminDashboard: Using cached Relwox balance', ['balance' => $relwoxBalance]);
+        } else {
+            try {
+                $relwoxService = new RelwoxService();
+                $relwoxResponse = $relwoxService->checkWalletBalance('UGX');
+                $relwoxBalance = $relwoxResponse['balance'] ?? $relwoxResponse['amount'] ?? $relwoxResponse['wallet_balance'] ?? null;
+                
+                // Cache the result for 5 minutes
+                Cache::put($relwoxCacheKey, [
+                    'balance' => $relwoxBalance,
+                    'error' => null,
+                    'fetched_at' => now()->toIso8601String(),
+                ], now()->addMinutes(5));
+                
+                Log::info('AdminDashboard: Relwox balance fetched', [
+                    'response' => $relwoxResponse,
+                    'balance' => $relwoxBalance,
+                ]);
+            } catch (\Exception $e) {
+                $relwoxError = $e->getMessage();
+                
+                // Cache error for 1 minute to avoid hammering the API
+                Cache::put($relwoxCacheKey, [
+                    'balance' => null,
+                    'error' => $relwoxError,
+                    'fetched_at' => now()->toIso8601String(),
+                ], now()->addMinute());
+                
+                Log::error('AdminDashboard: Failed to fetch Relwox balance', [
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
+                ]);
+            }
+        }
+
+        if ($cachedEazzy !== null) {
+            $eazzyBalance = $cachedEazzy['balance'] ?? null;
+            $eazzyError = $cachedEazzy['error'] ?? null;
+            Log::info('AdminDashboard: Using cached EazzyConnect balance', ['balance' => $eazzyBalance]);
+        } else {
+            try {
+                $eazzyService = new EazzyConnectService();
+                $eazzyResponse = $eazzyService->getAccountBalance();
+                $eazzyBalance = $eazzyResponse['balance'] ?? $eazzyResponse['amount'] ?? $eazzyResponse['account_balance'] ?? $eazzyResponse['wallet_balance'] ?? null;
+                
+                // Cache the result for 5 minutes
+                Cache::put($eazzyCacheKey, [
+                    'balance' => $eazzyBalance,
+                    'error' => null,
+                    'fetched_at' => now()->toIso8601String(),
+                ], now()->addMinutes(5));
+                
+                Log::info('AdminDashboard: EazzyConnect balance fetched', [
+                    'response' => $eazzyResponse,
+                    'balance' => $eazzyBalance,
+                ]);
+            } catch (\Exception $e) {
+                $eazzyError = $e->getMessage();
+                
+                // Cache error for 1 minute to avoid hammering the API
+                Cache::put($eazzyCacheKey, [
+                    'balance' => null,
+                    'error' => $eazzyError,
+                    'fetched_at' => now()->toIso8601String(),
+                ], now()->addMinute());
+                
+                Log::error('AdminDashboard: Failed to fetch EazzyConnect balance', [
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
+                ]);
+            }
+        }
+
         return Inertia::render('admin/Dashboard', [
             'dau' => $dau,
             'mau' => $mau,
@@ -122,6 +222,18 @@ class AdminController extends Controller
                 'revenue' => $revenueSeries,
             ],
             'config' => $currentConfig,
+            'providerBalances' => [
+                'relwox' => [
+                    'balance' => $relwoxBalance,
+                    'currency' => 'UGX',
+                    'error' => $relwoxError,
+                ],
+                'eazzyconnect' => [
+                    'balance' => $eazzyBalance,
+                    'currency' => 'UGX',
+                    'error' => $eazzyError,
+                ],
+            ],
         ]);
     }
 }
