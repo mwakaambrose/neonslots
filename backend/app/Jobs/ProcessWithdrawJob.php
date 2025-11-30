@@ -30,12 +30,22 @@ class ProcessWithdrawJob implements ShouldQueue
 
         try {
             $player = $tx->player;
-            $amount = abs((float) $tx->amount_credits);
+            $amountCredits = abs((float) $tx->amount_credits);
+            
+            // Convert credits to UGX before sending to payment provider
+            // Frontend sends credits, but Relwox expects UGX amounts
+            $exchangeRate = config('game.exchange_rate', 25);
+            $amountUgx = $amountCredits * $exchangeRate;
 
-            $resp = $relwox->sendPayment($player->phone, $amount, 'UGX', 'Neon Slots withdrawal');
+            $resp = $relwox->sendPayment($player->phone, $amountUgx, 'UGX', 'Neon Slots withdrawal');
 
-            // persist response and external reference
-            $tx->meta = array_merge((array) $tx->meta, ['provider_response' => $resp]);
+            // Persist response and store UGX amount for reference
+            $tx->meta = array_merge((array) $tx->meta, [
+                'provider_response' => $resp,
+                'amount_ugx' => $amountUgx,
+                'amount_credits' => $amountCredits,
+                'exchange_rate' => $exchangeRate,
+            ]);
             if (isset($resp['internal_reference'])) {
                 $tx->external_ref = $resp['internal_reference'];
             } elseif (isset($resp['reference'])) {

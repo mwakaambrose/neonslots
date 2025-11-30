@@ -29,12 +29,22 @@ class ProcessDepositJob implements ShouldQueue
 
         try {
             $player = $tx->player;
-            $amount = (float) $tx->amount_credits;
+            $amountCredits = (float) $tx->amount_credits;
+            
+            // Convert credits to UGX before sending to payment provider
+            // Frontend sends credits, but Relwox expects UGX amounts
+            $exchangeRate = config('game.exchange_rate', 25);
+            $amountUgx = $amountCredits * $exchangeRate;
 
-            $resp = $relwox->requestPayment($player->phone, $amount, 'UGX', 'Neon Slots deposit');
+            $resp = $relwox->requestPayment($player->phone, $amountUgx, 'UGX', 'Neon Slots deposit');
 
-            // Persist provider details
-            $tx->meta = array_merge((array) $tx->meta, ['provider_response' => $resp]);
+            // Persist provider details and store UGX amount for reference
+            $tx->meta = array_merge((array) $tx->meta, [
+                'provider_response' => $resp,
+                'amount_ugx' => $amountUgx,
+                'amount_credits' => $amountCredits,
+                'exchange_rate' => $exchangeRate,
+            ]);
             if (isset($resp['internal_reference'])) {
                 $tx->external_ref = $resp['internal_reference'];
             } elseif (isset($resp['reference'])) {

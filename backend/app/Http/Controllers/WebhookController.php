@@ -46,8 +46,10 @@ class WebhookController extends Controller
             // Credit wallet only for deposits
             if ($tx->type === 'deposit') {
                 $wallet = Wallet::firstOrCreate(['player_id' => $tx->player_id]);
-                $amount = isset($data['amount']) ? (int)$data['amount'] : (int)$tx->amount_credits;
-                $wallet->increment('balance_credits', $amount);
+                // Webhook sends amount in UGX, but we store credits in wallet
+                // Use the original transaction amount_credits (already in credits)
+                $amountCredits = (int)$tx->amount_credits;
+                $wallet->increment('balance_credits', $amountCredits);
             }
         } elseif (in_array($status, ['failed', 'error', 'rejected'])) {
             // For failed withdrawals, refund
