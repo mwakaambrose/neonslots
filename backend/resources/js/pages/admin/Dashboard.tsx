@@ -569,7 +569,7 @@ export default function AdminDashboard() {
                                         {providerBalances?.eazzyconnect?.error ? (
                                             <span className="text-red-500 text-base font-bold">❌ Failed to fetch</span>
                                         ) : providerBalances?.eazzyconnect?.balance !== null && providerBalances?.eazzyconnect?.balance !== undefined ? (
-                                            fmtUGX(providerBalances.eazzyconnect.balance)
+                                            <span>{String(providerBalances.eazzyconnect.balance)}</span>
                                         ) : (
                                             <span className="text-muted flex items-center gap-2">
                                                 <span className="animate-spin">⏳</span> Loading...

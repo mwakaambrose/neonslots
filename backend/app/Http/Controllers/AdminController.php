@@ -171,7 +171,9 @@ class AdminController extends Controller
             try {
                 $eazzyService = new EazzyConnectService();
                 $eazzyResponse = $eazzyService->getAccountBalance();
-                $eazzyBalance = $eazzyResponse['balance'] ?? $eazzyResponse['amount'] ?? $eazzyResponse['account_balance'] ?? $eazzyResponse['wallet_balance'] ?? null;
+                
+                // Use balance as-is from the API response
+                $eazzyBalance = $eazzyResponse['data']['balance'] ?? $eazzyResponse['balance'] ?? null;
                 
                 // Cache the result for 5 minutes
                 Cache::put($eazzyCacheKey, [
