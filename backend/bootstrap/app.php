@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
+use App\Http\Middleware\AddCorsHeaders;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -24,9 +25,9 @@ return Application::configure(basePath: dirname(__DIR__))
             AddLinkHeadersForPreloadedAssets::class,
         ]);
 
-        // Enable CORS for API routes - Laravel 11+ handles this automatically if config/cors.php exists
-        // But we ensure it's applied to API routes
+        // Enable CORS for API routes - use custom middleware for explicit control
         $middleware->api(prepend: [
+            AddCorsHeaders::class,
             \Illuminate\Http\Middleware\HandleCors::class,
         ]);
     })
