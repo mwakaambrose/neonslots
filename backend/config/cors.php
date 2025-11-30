@@ -7,6 +7,8 @@ return [
         'http://localhost:5173',
         'http://localhost:3000',
         'http://localhost:8000',
+        'https://www.neonslots.site',
+        'https://neonslots.site'
     ],
     'allowed_origins_patterns' => [],
     'allowed_headers' => ['*'],
