@@ -13,23 +13,21 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
         User::firstOrCreate(
-            ['email' => 'test@example.com'],
+            ['email' => 'ambrose@zzzimba.com'],
             [
-                'name' => 'Test User',
-                'password' => 'password',
+                'name' => 'Ambrose Mwaka',
+                'password' => 'Win@2026WithTech',
                 'email_verified_at' => now(),
             ]
         );
-        $this->call([
-            PlayerSeeder::class,
-            MachineSeeder::class,
-            WalletSeeder::class,
-            TransactionSeeder::class,
-            SpinSeeder::class,
-            ProgressiveJackpotSeeder::class,
-        ]);
+        // $this->call([
+        //     PlayerSeeder::class,
+        //     MachineSeeder::class,
+        //     WalletSeeder::class,
+        //     TransactionSeeder::class,
+        //     SpinSeeder::class,
+        //     ProgressiveJackpotSeeder::class,
+        // ]);
     }
 }
