@@ -34,6 +34,18 @@ class AuthController extends Controller
         $phone = $request->input('phone');
         $otp = $request->input('otp');
 
+        // Check for rate limiting (max 5 attempts per phone per 15 minutes)
+        $attemptsKey = 'otp_attempts_' . $phone;
+        $attempts = \Illuminate\Support\Facades\Cache::get($attemptsKey, 0);
+        
+        if ($attempts >= 5) {
+            \Illuminate\Support\Facades\Log::warning('AuthController: Too many OTP verification attempts', ['phone' => $phone]);
+            return response()->json([
+                'error' => 'Too many failed attempts. Please request a new OTP.',
+                'retry_after' => \Illuminate\Support\Facades\Cache::get($attemptsKey . '_until', now()->addMinutes(15)->timestamp)
+            ], 429);
+        }
+
         $otpRecord = \App\Models\Otp::where('phone', $phone)
             ->where('code', $otp)
             ->where('expires_at', '>', now())
@@ -41,8 +53,25 @@ class AuthController extends Controller
             ->first();
 
         if (!$otpRecord) {
-            return response()->json(['error' => 'Invalid OTP'], 422);
+            // Increment failed attempts
+            \Illuminate\Support\Facades\Cache::put($attemptsKey, $attempts + 1, now()->addMinutes(15));
+            \Illuminate\Support\Facades\Cache::put($attemptsKey . '_until', now()->addMinutes(15)->timestamp, now()->addMinutes(15));
+            
+            \Illuminate\Support\Facades\Log::info('AuthController: Invalid OTP attempt', [
+                'phone' => $phone,
+                'attempts' => $attempts + 1,
+            ]);
+            
+            return response()->json([
+                'error' => 'Invalid or expired OTP code. Please try again.',
+                'hint' => 'For testing, use code 1234',
+                'attempts_remaining' => max(0, 5 - ($attempts + 1))
+            ], 422);
         }
+
+        // Clear attempts on success
+        \Illuminate\Support\Facades\Cache::forget($attemptsKey);
+        \Illuminate\Support\Facades\Cache::forget($attemptsKey . '_until');
 
         $player = Player::firstOrCreate(['phone' => $phone], [
             'display_name' => 'Player ' . Str::random(6),

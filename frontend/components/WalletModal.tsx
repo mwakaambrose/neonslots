@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { X, Smartphone, CreditCard, Wallet, CheckCircle } from 'lucide-react';
 import { walletService } from '../services/walletApi';
 import { EXCHANGE_RATE, getProvider, UG_PREFIX } from '../constants';
@@ -19,9 +19,49 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, onDep
   const [step, setStep] = useState<'SELECT' | 'PENDING' | 'SUCCESS'>('SELECT');
   const [error, setError] = useState<string>('');
   const [pendingDeposit, setPendingDeposit] = useState<{ message?: string; external_ref?: string } | null>(null);
+  const [initialBalance, setInitialBalance] = useState<number>(balance);
 
   // Packages: 40 (1k), 200 (5k), 1000 (25k), 2000 (50k)
   const depositPackages = [40, 200, 1000, 2000];
+
+  // Poll for balance changes when deposit is pending
+  useEffect(() => {
+    if (step === 'PENDING' && mode === 'DEPOSIT' && pendingDeposit) {
+      const interval = setInterval(async () => {
+        try {
+          const updatedWallet = await walletService.getBalance();
+          if (updatedWallet && typeof updatedWallet.balance === 'number') {
+            // Check if balance increased (deposit completed)
+            if (updatedWallet.balance > initialBalance) {
+              setStep('SUCCESS');
+              onDepositSuccess(updatedWallet.balance);
+              clearInterval(interval);
+            }
+          }
+        } catch (e) {
+          console.error('Failed to poll balance', e);
+        }
+      }, 3000); // Poll every 3 seconds
+      
+      // Stop polling after 5 minutes
+      const timeout = setTimeout(() => {
+        clearInterval(interval);
+      }, 5 * 60 * 1000);
+
+      return () => {
+        clearInterval(interval);
+        clearTimeout(timeout);
+      };
+    }
+  }, [step, mode, pendingDeposit, initialBalance, onDepositSuccess]);
+
+  // Update initial balance when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setInitialBalance(balance);
+    }
+  }, [isOpen, balance]);
+
 
   if (!isOpen) return null;
 
@@ -73,7 +113,8 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, onDep
             setLoading(false);
             setStep('PENDING');
             setPendingDeposit({ message: result.message, external_ref: result.external_ref });
-            // Do NOT close modal or reset wallet
+            setInitialBalance(balance); // Set initial balance for polling comparison
+            // Do NOT close modal or reset wallet - polling will handle balance update
             return;
           } else {
             setLoading(false);

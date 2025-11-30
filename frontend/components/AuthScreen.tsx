@@ -108,8 +108,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin, onOpenTerms }) 
       <div className="relative z-10 w-full max-w-md flex flex-col items-center">
         {/* Hero with animated slot machine */}
         <div className="mb-8 w-full text-center">
-          <div className="mb-4">
-            {/* Animated slot machine display */}
+          {/* <div className="mb-4">
             <div className="inline-block bg-black border-4 border-amber-600 rounded-xl p-4 shadow-[0_0_30px_rgba(234,179,8,0.4)]">
               <div className="grid grid-cols-3 gap-2">
                 {['🦍', '🦍', '🦍'].map((symbol, i) => (
@@ -123,7 +122,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin, onOpenTerms }) 
                 ))}
               </div>
             </div>
-          </div>
+          </div> */}
           <h1 className="text-6xl font-black mb-2 text-center">
             <span className="block bg-gradient-to-r from-amber-300 via-yellow-400 to-amber-600 bg-clip-text text-transparent drop-shadow-[0_0_20px_rgba(245,158,11,0.5)] animate-pulse">
               NEON
@@ -135,14 +134,14 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin, onOpenTerms }) 
           <p className="text-slate-300 mt-2 tracking-widest text-sm uppercase font-bold">🎰 Uganda's #1 Mobile Casino 🎰</p>
           
           {/* Win animation preview */}
-          <div className="mt-4 text-center">
+          <div className="mt-2 text-center">
             <div className="inline-block bg-green-500/20 border border-green-500/50 rounded-lg px-4 py-2">
               <span className="text-green-400 font-black text-lg animate-pulse">💰 BIG WIN! +10,000 Credits 💰</span>
             </div>
           </div>
         </div>
 
-      <div className="w-full bg-slate-900/80 backdrop-blur-md border-4 border-amber-600 p-8 rounded-3xl shadow-[0_0_50px_rgba(234,179,8,0.3)]">
+      <div className="w-full bg-slate-900/80 backdrop-blur-md border-4 border-amber-600 px-8 py-6 rounded-3xl shadow-[0_0_50px_rgba(234,179,8,0.3)]">
         {step === 'PHONE' ? (
           <form onSubmit={handleSendOtp} className="space-y-6">
             <div className="space-y-2">
@@ -209,10 +208,19 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin, onOpenTerms }) 
               <label className="text-sm font-bold text-slate-300 uppercase">Enter verification code</label>
               <input
                 type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
                 value={otp}
-                onChange={(e) => setOtp(e.target.value)}
+                onChange={(e) => {
+                  // Only allow numbers
+                  const value = e.target.value.replace(/\D/g, '');
+                  // Limit to 4 digits
+                  if (value.length <= 4) {
+                    setOtp(value);
+                  }
+                }}
                 placeholder="XXXX"
-                className="w-full bg-slate-950 border border-slate-700 rounded-xl py-3 px-4 text-center text-2xl tracking-[0.5em] text-white focus:border-amber-500 focus:outline-none transition-all"
+                className="w-full bg-slate-950 border border-slate-700 rounded-xl py-3 px-4 text-center text-2xl tracking-[0.5em] text-white focus:border-amber-500 focus:outline-none transition-all font-mono"
                 maxLength={4}
                 autoFocus
               />

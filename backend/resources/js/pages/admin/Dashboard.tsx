@@ -332,29 +332,35 @@ export default function AdminDashboard() {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Admin Dashboard" />
-            <div className="p-6">
-                <div className="flex items-center justify-between">
-                    <h1 className="text-2xl font-semibold">Admin Dashboard</h1>
-                    <div className="text-sm text-muted">
-                        Observed RTP target: {(targetRtp * 100).toFixed(2)}%
+            <div className="p-6 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 min-h-screen">
+                {/* Header with gradient */}
+                <div className="mb-8">
+                    <div className="flex items-center justify-between mb-2">
+                        <h1 className="text-4xl font-black bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 bg-clip-text text-transparent">
+                            🎰 Admin Dashboard
+                        </h1>
+                        <div className="text-sm font-bold bg-amber-100 dark:bg-amber-900/30 px-4 py-2 rounded-full border-2 border-amber-500/50">
+                            RTP Target: <span className="text-amber-600 dark:text-amber-400">{(targetRtp * 100).toFixed(2)}%</span>
+                        </div>
                     </div>
+                    <p className="text-slate-600 dark:text-slate-400 text-sm">Monitor your slot machine operations in real-time</p>
                 </div>
 
                 <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                    <Card>
-                        <CardHeader className="flex items-start justify-between">
-                            <CardTitle className="text-sm">
+                    <Card className="border-2 border-blue-500/30 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/30 dark:to-blue-900/20 shadow-lg hover:shadow-xl transition-shadow">
+                        <CardHeader className="flex items-start justify-between pb-2">
+                            <CardTitle className="text-sm font-bold text-blue-700 dark:text-blue-400">
                                 Daily Active
                             </CardTitle>
-                            <div className="text-xs text-muted">DAU</div>
+                            <div className="text-xs font-bold bg-blue-500 text-white px-2 py-1 rounded-full">DAU</div>
                         </CardHeader>
                         <CardContent>
                             <div className="flex items-center justify-between">
-                                <div className="text-2xl font-semibold">
+                                <div className="text-3xl font-black text-blue-600 dark:text-blue-400">
                                     {fmt(dau)}
                                 </div>
                                 {timeseries?.dau ? (
-                                    <Badge variant="secondary">
+                                    <Badge variant="secondary" className="bg-blue-500/20 text-blue-700 dark:text-blue-400 border-blue-500/50">
                                         {(
                                             pctChange(timeseries.dau) ?? 0
                                         ).toFixed(1)}
@@ -365,15 +371,15 @@ export default function AdminDashboard() {
                         </CardContent>
                     </Card>
 
-                    <Card>
-                        <CardHeader className="flex items-start justify-between">
-                            <CardTitle className="text-sm">
+                    <Card className="border-2 border-purple-500/30 bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950/30 dark:to-purple-900/20 shadow-lg hover:shadow-xl transition-shadow">
+                        <CardHeader className="flex items-start justify-between pb-2">
+                            <CardTitle className="text-sm font-bold text-purple-700 dark:text-purple-400">
                                 Monthly Active
                             </CardTitle>
-                            <div className="text-xs text-muted">MAU</div>
+                            <div className="text-xs font-bold bg-purple-500 text-white px-2 py-1 rounded-full">MAU</div>
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-semibold">
+                            <div className="text-3xl font-black text-purple-600 dark:text-purple-400">
                                 {fmt(mau)}
                             </div>
                         </CardContent>
@@ -559,13 +565,15 @@ export default function AdminDashboard() {
                                             <span className="text-xs text-red-500">Error</span>
                                         )}
                                     </div>
-                                    <div className="text-sm font-semibold">
+                                    <div className="text-2xl font-bold text-green-700 dark:text-green-300">
                                         {providerBalances?.eazzyconnect?.error ? (
-                                            <span className="text-red-500">Failed</span>
+                                            <span className="text-red-500 text-base font-bold">❌ Failed to fetch</span>
                                         ) : providerBalances?.eazzyconnect?.balance !== null && providerBalances?.eazzyconnect?.balance !== undefined ? (
                                             fmtUGX(providerBalances.eazzyconnect.balance)
                                         ) : (
-                                            <span className="text-muted">-</span>
+                                            <span className="text-muted flex items-center gap-2">
+                                                <span className="animate-spin">⏳</span> Loading...
+                                            </span>
                                         )}
                                     </div>
                                 </div>
@@ -619,17 +627,20 @@ export default function AdminDashboard() {
 
                 {/* Provider Wallet Balances */}
                 <div className="mt-6">
-                    <Card>
-                        <CardHeader className="flex items-center justify-between">
+                    <Card className="border-2 border-amber-500/30 bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-950/30 dark:to-yellow-950/20 shadow-lg">
+                        <CardHeader className="flex items-center justify-between bg-gradient-to-r from-amber-500/10 to-yellow-500/10 dark:from-amber-900/20 dark:to-yellow-900/20 pb-4">
                             <div>
-                                <CardTitle>Payment Provider Wallet Balances</CardTitle>
-                                <p className="text-xs text-muted mt-1">
+                                <CardTitle className="text-xl font-black text-amber-700 dark:text-amber-400 flex items-center gap-2">
+                                    💰 Payment Provider Balances
+                                </CardTitle>
+                                <p className="text-xs text-amber-600 dark:text-amber-500 mt-1 font-medium">
                                     Balances are cached for 5 minutes. Click refresh to update.
                                 </p>
                             </div>
                             <Button
                                 size="sm"
                                 variant="outline"
+                                className="border-amber-500 text-amber-700 dark:text-amber-400 hover:bg-amber-500 hover:text-white font-bold"
                                 onClick={() => {
                                     // Clear cache and reload
                                     fetch('/api/admin/clear-balance-cache', { method: 'POST', credentials: 'same-origin' })
@@ -654,11 +665,13 @@ export default function AdminDashboard() {
                                     </div>
                                     <div className="text-2xl font-bold text-blue-700 dark:text-blue-300">
                                         {providerBalances?.relwox?.error ? (
-                                            <span className="text-red-500 text-base">Failed to fetch</span>
+                                            <span className="text-red-500 text-base font-bold">❌ Failed to fetch</span>
                                         ) : providerBalances?.relwox?.balance !== null && providerBalances?.relwox?.balance !== undefined ? (
                                             fmtUGX(providerBalances.relwox.balance)
                                         ) : (
-                                            <span className="text-muted">Loading...</span>
+                                            <span className="text-muted flex items-center gap-2">
+                                                <span className="animate-spin">⏳</span> Loading...
+                                            </span>
                                         )}
                                     </div>
                                     {providerBalances?.relwox?.error && (

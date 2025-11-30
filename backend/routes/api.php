@@ -15,7 +15,10 @@ Route::post('/auth/verify-otp', [AuthController::class, 'verifyOtp']);
 
 Route::get('/machines', [MachineController::class, 'index']);
 
+// Webhook endpoints (no auth required, signature validation instead)
 Route::post('/deposit/webhook', [WebhookController::class, 'depositWebhook']);
+Route::post('/withdraw/webhook', [WebhookController::class, 'withdrawWebhook']);
+Route::post('/product/webhook', [WebhookController::class, 'productWebhook']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', function (Request $request) {

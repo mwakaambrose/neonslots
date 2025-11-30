@@ -42,7 +42,7 @@ export default function Welcome({
                 </div>
 
                 <div className="relative z-10 flex min-h-screen flex-col items-center justify-center p-6 lg:p-8">
-                    <header className="mb-8 w-full max-w-6xl">
+                    {/* <header className="mb-8 w-full max-w-6xl">
                     <nav className="flex items-center justify-end gap-4">
                         {auth.user ? (
                             <Link
@@ -70,7 +70,7 @@ export default function Welcome({
                             </>
                         )}
                     </nav>
-                </header>
+                </header> */}
 
                     <main className="flex w-full max-w-6xl flex-col items-center text-center">
                         {/* Main Hero */}
@@ -142,16 +142,17 @@ export default function Welcome({
                         </div>
 
                         {/* CTA */}
-                        {!auth.user && (
+                        {/* {!auth.user && (
                             <div className="flex gap-4">
                                 <Link
-                                    href={login()}
+                                    href="https://neonslots.site"
+                                    target="_blank"
                                     className="inline-block rounded-xl bg-gradient-to-r from-amber-500 to-yellow-600 px-8 py-4 text-lg font-black text-black hover:from-amber-400 hover:to-yellow-500 transition-all shadow-[0_0_30px_rgba(245,158,11,0.5)] hover:shadow-[0_0_40px_rgba(245,158,11,0.7)] transform hover:scale-105"
                                 >
                                     🎰 PLAY NOW 🎰
                                 </Link>
                         </div>
-                        )}
+                        )} */}
                     </main>
                 </div>
 

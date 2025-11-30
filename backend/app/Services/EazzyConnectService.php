@@ -22,26 +22,58 @@ class EazzyConnectService
 
     public function getAccountBalance()
     {
-        $response = Http::withHeaders([
-            'apiKey' => $this->apiKey,
-            'Accept' => 'application/vnd.eazzyconnect.v1',
-            'Content-Type' => 'application/json',
-        ])->get("{$this->apiUrl}/wallet/account-balance");
+        try {
+            $response = Http::timeout(10)->withHeaders([
+                'apiKey' => $this->apiKey,
+                'Accept' => 'application/vnd.eazzyconnect.v1',
+                'Content-Type' => 'application/json',
+            ])->get("{$this->apiUrl}/wallet/account-balance");
 
-        return $response->json();
+            if (!$response->successful()) {
+                \Illuminate\Support\Facades\Log::error('EazzyConnect: Failed to get balance', [
+                    'status' => $response->status(),
+                    'body' => $response->body(),
+                ]);
+                return ['error' => 'Failed to fetch balance', 'status' => $response->status()];
+            }
+
+            return $response->json();
+        } catch (\Illuminate\Http\Client\ConnectionException $e) {
+            \Illuminate\Support\Facades\Log::error('EazzyConnect: Connection timeout', ['error' => $e->getMessage()]);
+            return ['error' => 'Connection timeout', 'message' => $e->getMessage()];
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('EazzyConnect: Error getting balance', ['error' => $e->getMessage()]);
+            return ['error' => 'Service error', 'message' => $e->getMessage()];
+        }
     }
 
     public function sendSms(string $phoneNumber, string $message)
     {
-        $response = Http::withHeaders([
-            'apiKey' => $this->apiKey,
-            'Accept' => 'application/vnd.eazzyconnect.v1',
-        ])->asForm()->post("{$this->apiUrl}/sms/send", [
-            'phone_number' => $phoneNumber,
-            'message' => $message,
-        ]);
+        try {
+            $response = Http::timeout(10)->withHeaders([
+                'apiKey' => $this->apiKey,
+                'Accept' => 'application/vnd.eazzyconnect.v1',
+            ])->asForm()->post("{$this->apiUrl}/sms/send", [
+                'phone_number' => $phoneNumber,
+                'message' => $message,
+            ]);
 
-        return $response->json();
+            if (!$response->successful()) {
+                \Illuminate\Support\Facades\Log::error('EazzyConnect: Failed to send SMS', [
+                    'status' => $response->status(),
+                    'body' => $response->body(),
+                ]);
+                return ['error' => 'Failed to send SMS', 'status' => $response->status()];
+            }
+
+            return $response->json();
+        } catch (\Illuminate\Http\Client\ConnectionException $e) {
+            \Illuminate\Support\Facades\Log::error('EazzyConnect: SMS connection timeout', ['error' => $e->getMessage()]);
+            return ['error' => 'Connection timeout', 'message' => $e->getMessage()];
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('EazzyConnect: Error sending SMS', ['error' => $e->getMessage()]);
+            return ['error' => 'Service error', 'message' => $e->getMessage()];
+        }
     }
 
     public function sendBulkSms(array $phoneNumbers, string $message)

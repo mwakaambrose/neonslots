@@ -15,13 +15,21 @@ interface LoginProps {
     status?: string;
     canResetPassword: boolean;
     canRegister: boolean;
+    errors?: {
+        email?: string;
+        password?: string;
+        [key: string]: string | undefined;
+    };
 }
 
 export default function Login({
     status,
     canResetPassword,
     canRegister,
+    errors: propErrors,
 }: LoginProps) {
+    const { errors: formErrors } = store.form();
+    const errors = propErrors || formErrors || {};
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-900 relative overflow-hidden">
             {/* Animated slot machine background */}
@@ -170,6 +178,23 @@ export default function Login({
                                 </>
                             )}
                         </Form>
+
+                        {/* Error Messages */}
+                        {(errors.email || errors.password || Object.keys(errors).length > 0) && (
+                            <div className="mt-4 bg-red-900/20 border border-red-500/50 rounded-lg p-4">
+                                <div className="text-red-400 font-bold text-sm mb-2">⚠️ Login Failed</div>
+                                {errors.email && (
+                                    <div className="text-red-300 text-xs mb-1">• {errors.email}</div>
+                                )}
+                                {errors.password && (
+                                    <div className="text-red-300 text-xs mb-1">• {errors.password}</div>
+                                )}
+                                {Object.entries(errors).filter(([key]) => !['email', 'password'].includes(key)).map(([key, value]) => (
+                                    <div key={key} className="text-red-300 text-xs mb-1">• {String(value)}</div>
+                                ))}
+                                <div className="text-red-400 text-xs mt-2">Please check your credentials and try again.</div>
+                            </div>
+                        )}
 
                         {status && (
                             <div className="mt-4 text-center text-sm font-bold text-green-400 bg-green-900/20 border border-green-500/50 rounded-lg p-3">
