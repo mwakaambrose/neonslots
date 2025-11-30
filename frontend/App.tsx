@@ -27,11 +27,10 @@ const App: React.FC = () => {
     }
   });
   const [wallet, setWallet] = useState<Wallet | null>(null);
-    // On mount, if user exists in localStorage, fetch wallet using token
+    // On mount, if user exists in localStorage, fetch wallet
     useEffect(() => {
-      const token = localStorage.getItem('neonslots_token');
-      if (user && token) {
-        walletService.getBalance(token).then(setWallet).catch(() => setWallet(null));
+      if (user) {
+        walletService.getBalance().then(setWallet).catch(() => setWallet(null));
       }
     }, []);
   const [betIndex, setBetIndex] = useState(0);
@@ -226,13 +225,49 @@ const App: React.FC = () => {
   const sessionMinutes = Math.floor((Date.now() - sessionStart) / 60000);
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col items-center relative overflow-hidden font-sans">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-900 flex flex-col items-center relative overflow-hidden font-sans">
       
-      {/* Background Ambience */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-slate-900 via-slate-950 to-black z-0 pointer-events-none"></div>
+      {/* Animated Background Effects */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+        {/* Pulsing gradient orbs */}
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-amber-500/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute top-1/2 right-1/3 w-80 h-80 bg-pink-500/15 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+        <div className="absolute bottom-1/3 left-1/3 w-72 h-72 bg-blue-500/15 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '0.5s' }}></div>
+        
+        {/* Floating slot symbols */}
+        {['🍌', '☕', '🌯', '🥁', '🛵', '🦩', '🦍', '🛡️', '🎰', '💰', '⭐', '🎲'].map((symbol, i) => (
+          <div
+            key={i}
+            className="absolute text-4xl md:text-5xl opacity-10 md:opacity-15 animate-bounce"
+            style={{
+              left: `${5 + (i % 4) * 25}%`,
+              top: `${10 + Math.floor(i / 4) * 30}%`,
+              animationDelay: `${i * 0.3}s`,
+              animationDuration: `${3 + (i % 2)}s`,
+            }}
+          >
+            {symbol}
+          </div>
+        ))}
+        
+        {/* Additional sparkle effects */}
+        {[...Array(6)].map((_, i) => (
+          <div
+            key={`sparkle-${i}`}
+            className="absolute w-2 h-2 bg-amber-400 rounded-full opacity-40 animate-ping"
+            style={{
+              left: `${15 + i * 15}%`,
+              top: `${20 + (i % 3) * 25}%`,
+              animationDelay: `${i * 0.7}s`,
+              animationDuration: '2s',
+            }}
+          ></div>
+        ))}
+      </div>
 
       {/* Header */}
-      <header className="w-full max-w-2xl flex justify-between items-center p-4 z-20 bg-slate-900/80 backdrop-blur-sm border-b border-slate-800">
+      <header className="w-full max-w-2xl flex justify-between items-center p-4 z-20 bg-slate-900/90 backdrop-blur-md border-b border-amber-600/30 shadow-[0_4px_20px_rgba(234,179,8,0.2)]">
         <div className="flex items-center gap-2">
             <div className="bg-amber-500 rounded-full p-1"><UserIcon size={16} className="text-black" /></div>
             <span className="text-sm font-bold text-slate-300 hidden sm:block">{user.phone}</span>

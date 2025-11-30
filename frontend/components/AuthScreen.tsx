@@ -105,9 +105,9 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin, onOpenTerms }) 
         ))}
       </div>
 
-      <div className="relative z-10 w-full max-w-md">
+      <div className="relative z-10 w-full max-w-md flex flex-col items-center">
         {/* Hero with animated slot machine */}
-        <div className="mb-8 text-center">
+        <div className="mb-8 w-full text-center">
           <div className="mb-4">
             {/* Animated slot machine display */}
             <div className="inline-block bg-black border-4 border-amber-600 rounded-xl p-4 shadow-[0_0_30px_rgba(234,179,8,0.4)]">
@@ -124,12 +124,11 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin, onOpenTerms }) 
               </div>
             </div>
           </div>
-          <h1 className="text-6xl font-black mb-2">
-            <span className="bg-gradient-to-r from-amber-300 via-yellow-400 to-amber-600 bg-clip-text text-transparent drop-shadow-[0_0_20px_rgba(245,158,11,0.5)] animate-pulse">
+          <h1 className="text-6xl font-black mb-2 text-center">
+            <span className="block bg-gradient-to-r from-amber-300 via-yellow-400 to-amber-600 bg-clip-text text-transparent drop-shadow-[0_0_20px_rgba(245,158,11,0.5)] animate-pulse">
               NEON
             </span>
-            <br />
-            <span className="bg-gradient-to-r from-purple-400 via-pink-500 to-amber-500 bg-clip-text text-transparent drop-shadow-[0_0_20px_rgba(168,85,247,0.5)]">
+            <span className="block bg-gradient-to-r from-purple-400 via-pink-500 to-amber-500 bg-clip-text text-transparent drop-shadow-[0_0_20px_rgba(168,85,247,0.5)]">
               SLOTS
             </span>
           </h1>
@@ -250,7 +249,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin, onOpenTerms }) 
         )}
       </div>
       
-      <div className="mt-8 text-center text-slate-600 text-xs max-w-xs">
+      <div className="mt-8 w-full text-center text-slate-600 text-xs">
         <p>By playing you agree to our</p>
         <button 
             onClick={onOpenTerms}
@@ -259,6 +258,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin, onOpenTerms }) 
             Terms & Conditions
         </button>
         <p className="mt-2">18+ Only. Play Responsibly.</p>
+      </div>
       </div>
     </div>
   );
