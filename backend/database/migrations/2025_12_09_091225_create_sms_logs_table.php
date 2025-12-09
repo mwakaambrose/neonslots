@@ -20,7 +20,6 @@ return new class extends Migration
             $table->integer('status_code')->nullable();
             $table->decimal('cost', 10, 4)->nullable();
             $table->string('currency', 3)->nullable();
-            $table->decimal('cost_amount', 10, 4)->nullable();
             $table->integer('message_parts')->default(1);
             $table->string('type')->default('general'); // e.g., 'otp', 'transaction', 'general'
             $table->json('response_data')->nullable();

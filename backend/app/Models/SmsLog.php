@@ -14,7 +14,6 @@ class SmsLog extends Model
         'status_code',
         'cost',
         'currency',
-        'cost_amount',
         'message_parts',
         'type',
         'response_data',
@@ -23,7 +22,6 @@ class SmsLog extends Model
     protected $casts = [
         'response_data' => 'array',
         'cost' => 'decimal:4',
-        'cost_amount' => 'decimal:4',
         'message_parts' => 'integer',
         'status_code' => 'integer',
     ];
@@ -64,7 +62,6 @@ class SmsLog extends Model
             'status_code' => $recipient->statusCode ?? null,
             'cost' => $costAmount, // Store only numeric value
             'currency' => $currency,
-            'cost_amount' => $costAmount,
             'message_parts' => $recipient->messageParts ?? 1,
             'type' => $type,
             'response_data' => json_decode(json_encode($recipient), true),
