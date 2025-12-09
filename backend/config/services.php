@@ -61,4 +61,9 @@ return [
         'private_key' => env('MOBISPAY_PRIVATE_KEY'),
         'private_key_path' => env('MOBISPAY_PRIVATE_KEY_PATH'),
     ],
+
+    'africastalking' => [
+        'username' => env('AFRICASTALKING_USERNAME', 'sandbox'),
+        'api_key' => env('AFRICASTALKING_API_KEY'),
+    ],
 ];

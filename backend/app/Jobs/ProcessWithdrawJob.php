@@ -4,7 +4,6 @@ namespace App\Jobs;
 
 use App\Models\Transaction;
 use App\Services\RelwoxService;
-use App\Services\EazzyConnectService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;

@@ -2,7 +2,7 @@
 
 namespace App\Jobs;
 
-use App\Services\EazzyConnectService;
+use App\Services\AfricasTalkingService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -26,19 +26,18 @@ class SendOtpSmsJob implements ShouldQueue
     public function handle()
     {
         try {
-            $service = new EazzyConnectService();
+            $service = new AfricasTalkingService();
             $result = $service->sendOtp($this->phone, $this->code);
             
-            if (isset($result['error'])) {
-                Log::error('SendOtpSmsJob: Failed to send OTP via EazzyConnect', [
+            if (!($result['success'] ?? false)) {
+                Log::error('SendOtpSmsJob: Failed to send OTP via AfricasTalking', [
                     'phone' => $this->phone,
-                    'error' => $result['error'],
-                    'message' => $result['message'] ?? null,
+                    'error' => $result['error'] ?? 'Unknown error',
                 ]);
                 // Don't throw exception - allow job to complete to avoid retry loops
                 // The OTP is still stored in database, user can use it
             } else {
-                Log::info('SendOtpSmsJob: OTP sent successfully via EazzyConnect', [
+                Log::info('SendOtpSmsJob: OTP sent successfully via AfricasTalking', [
                     'phone' => $this->phone,
                     'response' => $result,
                 ]);

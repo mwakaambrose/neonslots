@@ -3,7 +3,7 @@
 namespace App\Jobs;
 
 use App\Models\Transaction;
-use App\Services\EazzyConnectService;
+use App\Services\AfricasTalkingService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -22,7 +22,7 @@ class SendTransactionSmsJob implements ShouldQueue
         $this->txId = $txId;
     }
 
-    public function handle(EazzyConnectService $sms)
+    public function handle(AfricasTalkingService $sms)
     {
         $tx = Transaction::find($this->txId);
         if (!$tx) return;
@@ -43,7 +43,7 @@ class SendTransactionSmsJob implements ShouldQueue
                     : "Your cashout of $amount credits is {$status}. We'll notify you when it's complete. Ref: {$tx->external_ref}.";
             }
 
-            $sms->sendSms($player->phone, $message);
+            $sms->sendTransactionSms($player->phone, $message);
         } catch (\Throwable $e) {
             Log::error('SendTransactionSmsJob failed', ['error' => $e->getMessage(), 'tx' => $this->txId]);
         }
