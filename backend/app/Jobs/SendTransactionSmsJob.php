@@ -33,14 +33,26 @@ class SendTransactionSmsJob implements ShouldQueue
             $amount = abs((int) $tx->amount_credits);
 
             $message = '';
-            if ($tx->type === 'deposit') {
-                $message = $status === 'completed'
-                    ? "Your deposit of $amount credits was successful. Ref: {$tx->external_ref}."
-                    : "Your deposit of $amount credits is {$status}. We'll notify you when it's complete. Ref: {$tx->external_ref}.";
+            $isDeposit = $tx->type === 'deposit';
+            $isSuccess = $status === 'completed';
+            $isFailed = in_array($status, ['failed', 'error'], true);
+
+            if ($isDeposit) {
+                if ($isSuccess) {
+                    $message = "Your deposit of $amount credits was successful. Ref: {$tx->external_ref}.";
+                } elseif ($isFailed) {
+                    $message = "Your deposit of $amount credits failed. Ref: {$tx->external_ref}.";
+                } else {
+                    $message = "Your deposit of $amount credits is {$status}. We'll notify you when it's complete. Ref: {$tx->external_ref}.";
+                }
             } else {
-                $message = $status === 'completed'
-                    ? "Your cashout of $amount credits was successful. Ref: {$tx->external_ref}."
-                    : "Your cashout of $amount credits is {$status}. We'll notify you when it's complete. Ref: {$tx->external_ref}.";
+                if ($isSuccess) {
+                    $message = "Your cashout of $amount credits was successful. Ref: {$tx->external_ref}.";
+                } elseif ($isFailed) {
+                    $message = "Your cashout of $amount credits failed. Ref: {$tx->external_ref}.";
+                } else {
+                    $message = "Your cashout of $amount credits is {$status}. We'll notify you when it's complete. Ref: {$tx->external_ref}.";
+                }
             }
 
             $sms->sendTransactionSms($player->phone, $message);
