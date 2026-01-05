@@ -1,6 +1,6 @@
 import { exec } from 'child_process';
 
-exec('npx next start -p 20266', (error, stdout, stderr) => {
+exec('npm run preview -- --port 20266 --host', (error, stdout, stderr) => {
   if (error) {
     console.error(`Error: ${error.message}`);
     return;
