@@ -1,4 +1,4 @@
-const { exec } = require('child_process');
+import { exec } from 'child_process';
 
 exec('npx next start -p 20266', (error, stdout, stderr) => {
   if (error) {
